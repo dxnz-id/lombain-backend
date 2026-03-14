@@ -12,10 +12,125 @@ datasource db {
   provider = "postgresql"
 }
 
+model Institution {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  users User[]
+}
+
+model Skill {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  users UserSkill[]
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
+  id        Int    @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String @unique
   password  String
+
+  major String
+  bio   String?
+
+  avatarUrl    String?
+  portfolioUrl String?
+
+  githubUrl   String?
+  linkedinUrl String?
+
+  institutionId Int
+  institution   Institution @relation(fields: [institutionId], references: [id])
+
+  skills UserSkill[]
+
+  teams TeamMember[]
+
+  competitions CompetitionParticipation[]
+
+  projects Project[]
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model UserSkill {
+  id Int @id @default(autoincrement())
+
+  userId  Int
+  skillId Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  skill Skill @relation(fields: [skillId], references: [id])
+
+  @@unique([userId, skillId])
+}
+
+model Team {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  category String?
+
+  members TeamMember[]
+
+  createdAt DateTime @default(now())
+}
+
+model TeamMember {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  teamId Int
+
+  role String
+
+  status String
+
+  user User @relation(fields: [userId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId])
+}
+
+model Competition {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  category String?
+
+  year Int?
+
+  participants CompetitionParticipation[]
+}
+
+model CompetitionParticipation {
+  id Int @id @default(autoincrement())
+
+  userId        Int
+  competitionId Int
+
+  role String
+
+  result String?
+
+  user        User        @relation(fields: [userId], references: [id])
+  competition Competition @relation(fields: [competitionId], references: [id])
+}
+
+model Project {
+  id Int @id @default(autoincrement())
+
+  title       String
+  description String?
+
+  link String?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }
